@@ -6,8 +6,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.Menu
-import android.view.MenuItem
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
@@ -38,29 +36,29 @@ class MainActivity : AppCompatActivity() {
         discovery = PcDiscovery(this)
 
         binding.photoPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+        binding.settingsButton.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
 
         ensurePermissionThenLoad()
-        discovery.start { host, port ->
-            runOnUiThread { prefs.pcHost = "$host:$port" }
+
+        // Only auto-fill on first run, when nothing is configured yet. Once the
+        // user has picked a PC (in Settings), further background discovery
+        // must never silently override that choice.
+        if (prefs.pcHost.isNullOrBlank()) {
+            discovery.start { server ->
+                runOnUiThread {
+                    if (prefs.pcHost.isNullOrBlank()) {
+                        prefs.pcHost = "${server.host}:${server.port}"
+                    }
+                }
+            }
         }
     }
 
     override fun onDestroy() {
         discovery.stop()
         super.onDestroy()
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_settings) {
-            startActivity(Intent(this, SettingsActivity::class.java))
-            return true
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun ensurePermissionThenLoad() {

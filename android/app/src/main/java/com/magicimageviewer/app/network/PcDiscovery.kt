@@ -5,26 +5,41 @@ import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.util.Log
 
+data class DiscoveredServer(val name: String, val host: String, val port: Int)
+
 /**
- * Discovers the PC agent on the LAN via mDNS/NSD. The PC agent registers
- * itself under SERVICE_TYPE (see pc-agent/agent.py).
+ * Discovers PC agents on the LAN via mDNS/NSD. The PC agent registers itself
+ * under SERVICE_TYPE (see pc-agent/agent.py). Reports every server found —
+ * callers decide which one(s) to trust.
  */
 class PcDiscovery(context: Context) {
     private val nsdManager = context.applicationContext
         .getSystemService(Context.NSD_SERVICE) as NsdManager
     private var listener: NsdManager.DiscoveryListener? = null
 
-    fun start(onFound: (host: String, port: Int) -> Unit) {
+    // NsdManager only tolerates one resolveService() in flight at a time on
+    // most Android versions; multiple servers on the network can otherwise
+    // trigger a crash. Resolve serially instead.
+    private val resolveQueue = ArrayDeque<NsdServiceInfo>()
+    private var resolving = false
+
+    fun start(onFound: (DiscoveredServer) -> Unit) {
         stop()
 
         val resolveListener = object : NsdManager.ResolveListener {
             override fun onResolveFailed(serviceInfo: NsdServiceInfo, errorCode: Int) {
                 Log.w(TAG, "Resolve failed for ${serviceInfo.serviceName}: $errorCode")
+                resolving = false
+                resolveNext(this)
             }
 
             override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
-                val host = serviceInfo.host?.hostAddress ?: return
-                onFound(host, serviceInfo.port)
+                resolving = false
+                val host = serviceInfo.host?.hostAddress
+                if (host != null) {
+                    onFound(DiscoveredServer(serviceInfo.serviceName, host, serviceInfo.port))
+                }
+                resolveNext(this)
             }
         }
 
@@ -35,7 +50,8 @@ class PcDiscovery(context: Context) {
 
             override fun onServiceFound(serviceInfo: NsdServiceInfo) {
                 if (serviceInfo.serviceType.startsWith(SERVICE_TYPE)) {
-                    nsdManager.resolveService(serviceInfo, resolveListener)
+                    resolveQueue.addLast(serviceInfo)
+                    resolveNext(resolveListener)
                 }
             }
 
@@ -56,11 +72,20 @@ class PcDiscovery(context: Context) {
         nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener)
     }
 
+    private fun resolveNext(resolveListener: NsdManager.ResolveListener) {
+        if (resolving) return
+        val next = resolveQueue.removeFirstOrNull() ?: return
+        resolving = true
+        nsdManager.resolveService(next, resolveListener)
+    }
+
     fun stop() {
         listener?.let {
             runCatching { nsdManager.stopServiceDiscovery(it) }
         }
         listener = null
+        resolveQueue.clear()
+        resolving = false
     }
 
     companion object {

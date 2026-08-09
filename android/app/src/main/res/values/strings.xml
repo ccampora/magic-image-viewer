@@ -2,10 +2,16 @@
 <resources>
     <string name="app_name">Magic Image Viewer</string>
     <string name="settings_title">Settings</string>
+    <string name="settings_icon">⚙</string>
     <string name="transfer_sent">Sent to PC</string>
     <string name="transfer_failed">Transfer failed: %1$s</string>
     <string name="no_pc_configured">No PC found. Set one in Settings.</string>
     <string name="pref_pc_host">PC address (host:port)</string>
-    <string name="pref_pc_host_summary">Auto-filled when discovered on the network. Override manually if discovery fails.</string>
-    <string name="action_rediscover">Search for PC now</string>
+    <string name="pref_pc_host_summary">Manual override. Leave set to whatever \'Choose PC\' picked, unless discovery fails.</string>
+    <string name="pref_choose_pc">Choose PC on network</string>
+    <string name="pref_choose_pc_summary_none">Not set — tap to scan the network</string>
+    <string name="pref_choose_pc_summary_set">Sending to %1$s</string>
+    <string name="dialog_choose_pc_title">Select PC</string>
+    <string name="dialog_searching">Searching for PCs on the network…</string>
+    <string name="action_enter_manually">Enter manually</string>
 </resources>

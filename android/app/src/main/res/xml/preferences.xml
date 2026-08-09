@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <Preference
+        android:key="choose_pc"
+        android:title="@string/pref_choose_pc"
+        android:summary="@string/pref_choose_pc_summary_none" />
+
     <EditTextPreference
         android:key="pc_host"
         android:title="@string/pref_pc_host"
         android:summary="@string/pref_pc_host_summary" />
-
-    <Preference
-        android:key="rediscover"
-        android:title="@string/action_rediscover" />
 
 </PreferenceScreen>
