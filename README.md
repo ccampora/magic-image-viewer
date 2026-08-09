@@ -16,8 +16,10 @@ your PC — fullscreen, replacing whatever photo was open before.
    `host:port` entry in Settings if mDNS is blocked on your network).
 3. Browsing photos: swipe **up/down** to move between photos, swipe **right**
    to transfer the current photo to the PC.
-4. The PC agent saves the file, closes the previously opened viewer (if any),
-   and opens the new photo with your configured viewer command.
+4. The PC agent saves the file to `/dev/shm` (RAM-backed, never touches disk
+   — see [`pc-agent/README.md`](pc-agent/README.md) for details), closes the
+   previously opened viewer (if any), and opens the new photo with your
+   configured viewer command.
 
 ## Status
 

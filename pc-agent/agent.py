@@ -6,11 +6,13 @@ Android app over HTTP, saves them, and launches a configured viewer.
 import argparse
 import fcntl
 import logging
+import os
 import shlex
 import socket
 import struct
 import subprocess
 import sys
+import tempfile
 import uuid
 from pathlib import Path
 
@@ -31,9 +33,25 @@ def load_config(path: Path) -> dict:
         sys.exit(1)
     with path.open() as f:
         cfg = yaml.safe_load(f)
-    cfg["save_dir"] = Path(cfg["save_dir"]).expanduser()
+
+    save_dir = cfg.get("save_dir")
+    if save_dir:
+        cfg["save_dir"] = Path(save_dir).expanduser()
+    else:
+        cfg["save_dir"] = _default_save_dir()
     cfg["save_dir"].mkdir(parents=True, exist_ok=True)
     return cfg
+
+
+def _default_save_dir() -> Path:
+    """RAM-backed by default: /dev/shm is conventionally always tmpfs on
+    Linux (unlike /tmp, whose backing varies by distro/config), so photos
+    never touch disk unless the user opts into a persistent save_dir.
+    """
+    shm = Path("/dev/shm")
+    if shm.is_dir() and os.access(shm, os.W_OK):
+        return shm / "magic-image-viewer"
+    return Path(tempfile.gettempdir()) / "magic-image-viewer"
 
 
 def _interface_ipv4(ifname: str) -> str | None:

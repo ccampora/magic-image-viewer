@@ -10,9 +10,18 @@ cd pc-agent
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-cp config.example.yaml config.yaml   # edit save_dir / viewer_command as needed
+cp config.example.yaml config.yaml   # edit viewer_command as needed
 python agent.py
 ```
+
+### Where photos are saved
+
+By default, received photos go to `/dev/shm` — RAM-backed tmpfs on Linux, so
+they never touch disk and are gone on reboot (falls back to the OS temp dir
+if `/dev/shm` isn't available, e.g. non-Linux). Set `save_dir` in
+`config.yaml` if you'd rather keep them permanently (e.g.
+`~/Pictures/FromPhone`). Either way, files aren't deleted automatically after
+being opened — clean up `save_dir` yourself if you want that.
 
 The agent advertises itself over mDNS as `magic-image-viewer._magicimg._tcp.local.`
 on your chosen port (default 8787), so the Android app can auto-discover it.

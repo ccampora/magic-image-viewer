@@ -1,6 +1,11 @@
 # Copy to config.yaml and adjust.
 port: 8787
-save_dir: "~/Pictures/FromPhone"
+
+# Where received photos are saved. Leave unset (or comment it out) to use
+# /dev/shm (RAM-backed tmpfs on Linux — photos never touch disk, and are gone
+# on reboot), falling back to the OS temp dir if /dev/shm isn't available.
+# Set an explicit path if you want them kept permanently instead:
+# save_dir: "~/Pictures/FromPhone"
 
 # Command used to open a newly received image. {file} is replaced with the
 # absolute path. The agent kills the previous viewer process before running
