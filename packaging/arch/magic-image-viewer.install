@@ -1,0 +1,33 @@
+post_install() {
+	cat << 'EOF'
+
+  magic-image-viewer installed successfully.
+
+  Set up your config:
+    mkdir -p ~/.config/magic-image-viewer
+    cp /usr/share/magic-image-viewer/config.example.yaml \
+       ~/.config/magic-image-viewer/config.yaml
+    # edit viewer_command / save_dir as needed
+
+  Enable the user service:
+    systemctl --user daemon-reload
+    systemctl --user enable --now magic-image-viewer
+
+  Check status / logs:
+    systemctl --user status magic-image-viewer
+    journalctl --user -u magic-image-viewer -f
+
+  Manual run (foreground):
+    magic-image-viewer-agent
+
+EOF
+}
+
+post_upgrade() {
+	cat << 'EOF'
+
+  magic-image-viewer upgraded. Restart the service to pick up the new version:
+    systemctl --user restart magic-image-viewer
+
+EOF
+}

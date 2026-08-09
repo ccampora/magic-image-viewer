@@ -1,0 +1,35 @@
+# Maintainer: ccampora <ccampora@gmail.com>
+pkgname=magic-image-viewer
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="PC agent that receives photos swiped from the Magic Image Viewer Android app and opens them fullscreen"
+arch=('any')
+url="https://github.com/ccampora/magic-image-viewer"
+license=('MIT')
+depends=('python' 'python-flask' 'python-zeroconf' 'python-yaml')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/ccampora/magic-image-viewer/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+install=magic-image-viewer.install
+
+package() {
+  cd "$srcdir/$pkgname-$pkgver"
+
+  install -dm755 "$pkgdir/usr/lib/magic-image-viewer"
+  install -Dm644 pc-agent/agent.py "$pkgdir/usr/lib/magic-image-viewer/agent.py"
+
+  install -dm755 "$pkgdir/usr/bin"
+  cat > "$pkgdir/usr/bin/magic-image-viewer-agent" << 'EOF'
+#!/usr/bin/env bash
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/magic-image-viewer/config.yaml"
+exec python3 /usr/lib/magic-image-viewer/agent.py --config "$CONFIG" "$@"
+EOF
+  chmod 755 "$pkgdir/usr/bin/magic-image-viewer-agent"
+
+  install -Dm644 pc-agent/config.example.yaml \
+    "$pkgdir/usr/share/magic-image-viewer/config.example.yaml"
+
+  install -Dm644 packaging/arch/magic-image-viewer.service \
+    "$pkgdir/usr/lib/systemd/user/magic-image-viewer.service"
+
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

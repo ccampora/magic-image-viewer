@@ -55,4 +55,11 @@ the non-obvious issues below — worth knowing if you extend either side.
 ```
 android/     Kotlin app (Gradle project — open in Android Studio)
 pc-agent/    Python agent (Flask + zeroconf)
+packaging/   Arch Linux (pacman) packaging for the PC agent
 ```
+
+## Installing the PC agent
+
+Arch Linux users with a local pacman repo can build and install a proper
+package instead of running from a manual clone — see
+[`pc-agent/README.md`](pc-agent/README.md#arch-linux-pacman-package).

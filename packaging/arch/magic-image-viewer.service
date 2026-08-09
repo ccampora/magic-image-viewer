@@ -1,0 +1,14 @@
+[Unit]
+Description=Magic Image Viewer PC agent
+Documentation=https://github.com/ccampora/magic-image-viewer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/magic-image-viewer-agent
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target

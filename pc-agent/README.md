@@ -5,6 +5,29 @@ them with a configured viewer.
 
 ## Setup
 
+### Arch Linux (pacman package)
+
+If you have a local pacman repo set up, build and publish the package with:
+
+```bash
+bash packaging/arch/build-arch.sh          # uses the version already in PKGBUILD
+bash packaging/arch/build-arch.sh 0.2.0    # or bump to a new git tag first
+```
+
+This pulls the source tarball from the matching `vX.Y.Z` GitHub tag, builds
+with `makepkg`, and publishes to the local repo (`$PKGREPO_DIR`, default
+`/srv/pkgrepo`) — so tag and push a release before building. Then install
+normally:
+
+```bash
+sudo pacman -Sy magic-image-viewer
+```
+
+The post-install message walks you through config setup and enabling the
+systemd service. See [`packaging/arch/PKGBUILD`](../packaging/arch/PKGBUILD).
+
+### Manual (any OS)
+
 ```bash
 cd pc-agent
 python3 -m venv venv
@@ -46,7 +69,10 @@ viewer_command: "feh -F {file}"     # fullscreen, X11
 viewer_command: "xdg-open {file}"   # OS default viewer (new window each time)
 ```
 
-## Run as a background service (systemd, Linux)
+## Run as a background service — manual install (systemd, Linux)
+
+(If you installed via pacman, use the service that ships with the package
+instead — see above.)
 
 ```bash
 mkdir -p ~/.config/systemd/user
