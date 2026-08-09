@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Magic Image Viewer</string>
+    <string name="settings_title">Settings</string>
+    <string name="transfer_sent">Sent to PC</string>
+    <string name="transfer_failed">Transfer failed: %1$s</string>
+    <string name="no_pc_configured">No PC found. Set one in Settings.</string>
+    <string name="pref_pc_host">PC address (host:port)</string>
+    <string name="pref_pc_host_summary">Auto-filled when discovered on the network. Override manually if discovery fails.</string>
+    <string name="action_rediscover">Search for PC now</string>
+</resources>

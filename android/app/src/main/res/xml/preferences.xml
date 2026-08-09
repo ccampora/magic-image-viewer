@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="pc_host"
+        android:title="@string/pref_pc_host"
+        android:summary="@string/pref_pc_host_summary" />
+
+    <Preference
+        android:key="rediscover"
+        android:title="@string/action_rediscover" />
+
+</PreferenceScreen>

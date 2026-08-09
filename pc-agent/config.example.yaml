@@ -1,0 +1,16 @@
+# Copy to config.yaml and adjust.
+port: 8787
+save_dir: "~/Pictures/FromPhone"
+
+# Command used to open a newly received image. {file} is replaced with the
+# absolute path. The agent kills the previous viewer process before running
+# this, so a fullscreen-capable viewer effectively "replaces" the picture on
+# screen instead of piling up windows. Examples:
+#   viewer_command: "xdg-open {file}"        # OS default viewer
+#   viewer_command: "imv -f {file}"          # imv, fullscreen (Wayland/X11)
+#   viewer_command: "feh -F {file}"          # feh, fullscreen
+#   viewer_command: "eog {file}"
+viewer_command: "imv -f {file}"
+
+# Name advertised over mDNS so the phone can auto-discover this agent.
+service_name: "magic-image-viewer"

@@ -1,0 +1,13 @@
+[Unit]
+Description=Magic Image Viewer PC agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/repos/magic-image-viewer/pc-agent
+ExecStart=%h/repos/magic-image-viewer/pc-agent/venv/bin/python agent.py
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,13 @@
+# Android
+android/.gradle/
+android/local.properties
+android/**/build/
+android/.idea/
+android/*.iml
+android/captures/
+
+# PC agent
+pc-agent/venv/
+pc-agent/config.yaml
+pc-agent/__pycache__/
+*.pyc
