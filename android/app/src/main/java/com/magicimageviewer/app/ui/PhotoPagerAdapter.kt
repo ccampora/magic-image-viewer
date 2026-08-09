@@ -14,12 +14,13 @@ import kotlin.math.abs
 /**
  * Shows one photo per page. ViewPager2 is set to VERTICAL orientation so
  * up/down swipes page through photos; a horizontal fling on the image is
- * intercepted here and reported as a "transfer to PC" gesture instead of
- * being treated as page navigation.
+ * intercepted here and reported as a "transfer to PC" (right) or "stop sync"
+ * (left) gesture instead of being treated as page navigation.
  */
 class PhotoPagerAdapter(
     private val photos: List<Uri>,
-    private val onSwipeRightToTransfer: (Uri) -> Unit
+    private val onSwipeRightToTransfer: (Uri) -> Unit,
+    private val onSwipeLeftToStopSync: () -> Unit
 ) : RecyclerView.Adapter<PhotoPagerAdapter.PhotoViewHolder>() {
 
     inner class PhotoViewHolder(val binding: ItemPhotoBinding) : RecyclerView.ViewHolder(binding.root)
@@ -51,10 +52,15 @@ class PhotoPagerAdapter(
                     val dx = e2.x - e1.x
                     val dy = e2.y - e1.y
                     val isHorizontal = abs(dx) > abs(dy)
-                    val isRightSwipe = dx > SWIPE_DISTANCE_THRESHOLD
                     val isFastEnough = abs(velocityX) > SWIPE_VELOCITY_THRESHOLD
-                    if (isHorizontal && isRightSwipe && isFastEnough) {
+                    if (!isHorizontal || !isFastEnough) return false
+
+                    if (dx > SWIPE_DISTANCE_THRESHOLD) {
                         onSwipeRightToTransfer(uri)
+                        return true
+                    }
+                    if (dx < -SWIPE_DISTANCE_THRESHOLD) {
+                        onSwipeLeftToStopSync()
                         return true
                     }
                     return false

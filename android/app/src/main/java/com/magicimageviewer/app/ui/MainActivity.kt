@@ -22,6 +22,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefs: PrefsRepository
     private lateinit var discovery: PcDiscovery
+    private var photos: List<Uri> = emptyList()
+
+    // Armed by a manual swipe-right transfer; while active (and the auto-sync
+    // setting is on), browsing up/down re-sends each newly shown photo.
+    private var syncModeActive = false
 
     private val requestPermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -39,6 +44,13 @@ class MainActivity : AppCompatActivity() {
         binding.settingsButton.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        binding.photoPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                if (syncModeActive && prefs.autoSyncEnabled && position in photos.indices) {
+                    transfer(photos[position])
+                }
+            }
+        })
 
         ensurePermissionThenLoad()
 
@@ -71,8 +83,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadPhotos() {
-        val photos = queryPhotos()
-        binding.photoPager.adapter = PhotoPagerAdapter(photos) { uri -> transfer(uri) }
+        photos = queryPhotos()
+        binding.photoPager.adapter = PhotoPagerAdapter(
+            photos,
+            onSwipeRightToTransfer = { uri -> transfer(uri) },
+            onSwipeLeftToStopSync = { stopSync() }
+        )
+    }
+
+    private fun stopSync() {
+        if (!syncModeActive) return
+        syncModeActive = false
+        showStatus(getString(R.string.sync_stopped))
     }
 
     private fun queryPhotos(): List<Uri> {
@@ -109,7 +131,10 @@ class MainActivity : AppCompatActivity() {
             val result = UploadClient.upload(hostPort, fileName, bytes, mimeType)
             runOnUiThread {
                 when (result) {
-                    is UploadClient.Result.Success -> showStatus(getString(R.string.transfer_sent))
+                    is UploadClient.Result.Success -> {
+                        syncModeActive = true
+                        showStatus(getString(R.string.transfer_sent))
+                    }
                     is UploadClient.Result.Failure -> showStatus(
                         getString(R.string.transfer_failed, result.message)
                     )
