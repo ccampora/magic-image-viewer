@@ -8,7 +8,7 @@ url="https://github.com/ccampora/magic-image-viewer"
 license=('MIT')
 depends=('python' 'python-flask' 'python-zeroconf' 'python-yaml')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/ccampora/magic-image-viewer/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('1485f2c1d7411e3d8c21825681c8e2a96cb72df258a9572ef693e5ec0f1596f8')
 install=magic-image-viewer.install
 
 package() {
