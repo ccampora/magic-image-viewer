@@ -4,17 +4,20 @@ Advertises itself on the LAN via mDNS, accepts image uploads from the
 Android app over HTTP, saves them, and launches a configured viewer.
 """
 import argparse
-import fcntl
 import logging
 import os
+import platform
 import shlex
 import socket
-import struct
 import subprocess
 import sys
 import tempfile
 import uuid
 from pathlib import Path
+
+if platform.system() == "Linux":
+    import fcntl
+    import struct
 
 import yaml
 from flask import Flask, request, abort
@@ -74,7 +77,12 @@ def _wifi_ip() -> str | None:
     USB/wired link to the phone (tethering, docks), the default route can
     point at the wrong one even though the phone is only reachable over
     Wi-Fi. /sys/class/net/<iface>/wireless only exists for real Wi-Fi NICs.
+
+    Linux-only (uses fcntl + /sys/class/net); other platforms fall back to
+    the default-route heuristic in local_ip().
     """
+    if platform.system() != "Linux":
+        return None
     net_dir = Path("/sys/class/net")
     if not net_dir.is_dir():
         return None
@@ -140,7 +148,9 @@ def launch_viewer(command_template: str, file_path: Path) -> None:
         except subprocess.TimeoutExpired:
             _last_viewer_proc.kill()
 
-    cmd = shlex.split(command_template.format(file=str(file_path)))
+    # posix=False on Windows so backslashes in paths (e.g. "C:\Program Files\...")
+    # aren't treated as shell escape characters.
+    cmd = shlex.split(command_template.format(file=str(file_path)), posix=(os.name != "nt"))
     try:
         _last_viewer_proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except FileNotFoundError:
@@ -163,9 +173,28 @@ def advertise(cfg: dict, port: int) -> tuple[Zeroconf, ServiceInfo]:
     return zc, info
 
 
+def _default_config_path() -> Path:
+    # Respect a config.yaml sitting next to the script (git-clone / manual dev
+    # workflow) before falling back to the per-OS user config location — the
+    # latter also matters for frozen (PyInstaller) builds, where __file__'s
+    # directory is a temp extraction folder, not somewhere to persist config.
+    local = Path(__file__).resolve().parent / "config.yaml"
+    if local.exists():
+        return local
+
+    system = platform.system()
+    if system == "Windows":
+        base = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
+    elif system == "Darwin":
+        base = Path.home() / "Library" / "Application Support"
+    else:
+        base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
+    return base / "magic-image-viewer" / "config.yaml"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=Path, default=Path(__file__).parent / "config.yaml")
+    parser.add_argument("--config", type=Path, default=_default_config_path())
     args = parser.parse_args()
 
     cfg = load_config(args.config)

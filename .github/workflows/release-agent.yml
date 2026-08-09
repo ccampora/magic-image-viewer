@@ -1,0 +1,52 @@
+name: Release PC agent binaries
+
+# Builds a standalone PyInstaller executable of the PC agent for Linux,
+# Windows, and macOS whenever a vX.Y.Z tag is pushed, and attaches them to
+# a GitHub Release. PyInstaller doesn't cross-compile, hence one job per OS.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_name: magic-image-viewer-agent-linux
+            build_path: pc-agent/dist/magic-image-viewer-agent
+          - os: windows-latest
+            asset_name: magic-image-viewer-agent-windows.exe
+            build_path: pc-agent/dist/magic-image-viewer-agent.exe
+          - os: macos-latest
+            asset_name: magic-image-viewer-agent-macos
+            build_path: pc-agent/dist/magic-image-viewer-agent
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build standalone executable
+        shell: bash
+        run: bash packaging/pyinstaller/build.sh
+
+      - name: Rename artifact
+        shell: bash
+        run: cp "${{ matrix.build_path }}" "${{ matrix.asset_name }}"
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.asset_name }}

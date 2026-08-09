@@ -10,4 +10,14 @@ android/captures/
 pc-agent/venv/
 pc-agent/config.yaml
 pc-agent/__pycache__/
+pc-agent/build/
+pc-agent/dist/
+pc-agent/*.spec
 *.pyc
+
+# Arch packaging build artifacts
+packaging/arch/*.pkg.tar.zst
+packaging/arch/*.pkg.tar.zst.sig
+packaging/arch/magic-image-viewer-*.tar.gz
+packaging/arch/pkg/
+packaging/arch/src/

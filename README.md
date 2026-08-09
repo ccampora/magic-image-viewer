@@ -16,10 +16,12 @@ your PC — fullscreen, replacing whatever photo was open before.
    `host:port` entry in Settings if mDNS is blocked on your network).
 3. Browsing photos: swipe **up/down** to move between photos, swipe **right**
    to transfer the current photo to the PC.
-4. The PC agent saves the file to `/dev/shm` (RAM-backed, never touches disk
-   — see [`pc-agent/README.md`](pc-agent/README.md) for details), closes the
+4. The PC agent saves the file (RAM-backed on Linux, never touching disk —
+   see [`pc-agent/README.md`](pc-agent/README.md) for details), closes the
    previously opened viewer (if any), and opens the new photo with your
    configured viewer command.
+
+The PC agent runs on Linux, Windows, and macOS.
 
 ## Status
 
@@ -55,11 +57,13 @@ the non-obvious issues below — worth knowing if you extend either side.
 ```
 android/     Kotlin app (Gradle project — open in Android Studio)
 pc-agent/    Python agent (Flask + zeroconf)
-packaging/   Arch Linux (pacman) packaging for the PC agent
+packaging/   Arch Linux (pacman) packaging + Windows/macOS autostart + PyInstaller build
 ```
 
 ## Installing the PC agent
 
-Arch Linux users with a local pacman repo can build and install a proper
-package instead of running from a manual clone — see
-[`pc-agent/README.md`](pc-agent/README.md#arch-linux-pacman-package).
+- **Arch Linux** with a local pacman repo: build and install a proper package
+  — see [`pc-agent/README.md`](pc-agent/README.md#arch-linux-pacman-package).
+- **Windows / macOS / other Linux**: download a standalone binary (no Python
+  needed) from the [Releases page](https://github.com/ccampora/magic-image-viewer/releases)
+  — see [`pc-agent/README.md`](pc-agent/README.md#windows--macos--other-linux-standalone-binary).
